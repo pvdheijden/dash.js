@@ -22,19 +22,25 @@ exec('npm run lint', {
 });
 `;
 
-const pathToHooksFolder = path.join(`${__dirname}`, '.git', 'hooks');
+
+function getPathToHooksFolder() {
+  const pathToHooksFolder = path.join(`${__dirname}`, '.git', 'hooks')
+  const pathToSuperHooksFolder = path.join(`${__dirname}`, '../.git/modules/dash.js', 'hooks')
+
+  return fs.existsSync(pathToHooksFolder) ? pathToHooksFolder : pathToSuperHooksFolder
+}
 
 function writeHook() {
-  const precommitFile = path.join(pathToHooksFolder, 'pre-commit');
+  const precommitFile = path.join(getPathToHooksFolder(), 'pre-commit');
   fs.writeFile(precommitFile, precommitTemplate, { mode: 0o755 }, (err) => {
     if (err) throw err;
     console.log(`${precommitFile} created.`);
   });
 }
 
-fs.access(pathToHooksFolder, (err) => {
+fs.access(getPathToHooksFolder(), (err) => {
   if (err) {
-    fs.mkdir(pathToHooksFolder, { recursive: true }, (err) => {
+    fs.mkdir(getPathToHooksFolder(), { recursive: true }, (err) => {
       if (err) throw err;
       writeHook();
     });
